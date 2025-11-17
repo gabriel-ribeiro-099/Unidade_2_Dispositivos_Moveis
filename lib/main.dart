@@ -41,21 +41,26 @@ class _MyHomePageState extends State<MyHomePage> {
   void _incrementColor(Function(int) setColor, int currentValue) {
     setState(() {
       if (currentValue < 255) {
-        setColor(currentValue + _val);
+        final newValue = (currentValue + _val).clamp(0, 255);
+        setColor(newValue);
       }
     });
   }
 
   void _decrementColor(Function(int) setColor, int currentValue) {
     setState(() {
-      if (currentValue > 0) {
-        setColor(currentValue - _val);
-      }
+      final newValue = (currentValue - _val).clamp(0, 255);
+      setColor(newValue);
     });
   }
 
-  Widget _buildColorControl(String label, int value, Color activeColor,
-      VoidCallback onDecrement, VoidCallback onIncrement) {
+  Widget _buildColorControl(
+    String label,
+    int value,
+    Color activeColor,
+    VoidCallback onDecrement,
+    VoidCallback onIncrement,
+  ) {
     return Card(
       color: Colors.white,
       elevation: 5,
@@ -73,15 +78,11 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             const SizedBox(height: 10),
 
-            Text(
-              '$value',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            Text('$value', style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 10),
 
             IconButton(
-              icon: const Icon(
-                  Icons.indeterminate_check_box_outlined),
+              icon: const Icon(Icons.indeterminate_check_box_outlined),
               onPressed: onDecrement,
               iconSize: 45,
               color: activeColor.withOpacity(0.7),
@@ -91,7 +92,10 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               label,
               style: TextStyle(
-                  fontSize: 20, fontWeight: FontWeight.bold, color: activeColor),
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: activeColor,
+              ),
             ),
           ],
         ),
@@ -111,10 +115,16 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: currentColor,
-        title: Text(widget.title, style: TextStyle(color: ThemeData.estimateBrightnessForColor(currentColor) ==
-            Brightness.dark
-            ? Colors.white
-            : Colors.black,),),
+        title: Text(
+          widget.title,
+          style: TextStyle(
+            color:
+                ThemeData.estimateBrightnessForColor(currentColor) ==
+                    Brightness.dark
+                ? Colors.white
+                : Colors.black,
+          ),
+        ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -140,8 +150,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color:
-                          ThemeData.estimateBrightnessForColor(currentColor) ==
-                              Brightness.dark
+                              ThemeData.estimateBrightnessForColor(
+                                    currentColor,
+                                  ) ==
+                                  Brightness.dark
                               ? Colors.white
                               : Colors.black,
                         ),
@@ -158,39 +170,39 @@ class _MyHomePageState extends State<MyHomePage> {
                       'Red',
                       _red,
                       Colors.red,
-                          () => _decrementColor((val) => _red = val, _red),
-                          () => _incrementColor((val) => _red = val, _red),
+                      () => _decrementColor((val) => _red = val, _red),
+                      () => _incrementColor((val) => _red = val, _red),
                     ),
                     _buildColorControl(
                       'Green',
                       _green,
                       Colors.green,
-                          () => _decrementColor((val) => _green = val, _green),
-                          () => _incrementColor((val) => _green = val, _green),
+                      () => _decrementColor((val) => _green = val, _green),
+                      () => _incrementColor((val) => _green = val, _green),
                     ),
                     _buildColorControl(
                       'Blue',
                       _blue,
                       Colors.blue,
-                          () => _decrementColor((val) => _blue = val, _blue),
-                          () => _incrementColor((val) => _blue = val, _blue),
+                      () => _decrementColor((val) => _blue = val, _blue),
+                      () => _incrementColor((val) => _blue = val, _blue),
                     ),
                   ],
                 ),
-            SizedBox(height: 20,),
-            Row(
-              children: [
-                Expanded(
-                    child: ElevatedButton(
-                        onPressed: (){
+                SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
                           wasPressedMaxMin = !wasPressedMaxMin;
-                          if(wasPressedMaxMin){
+                          if (wasPressedMaxMin) {
                             setState(() {
                               _red = 255;
                               _green = 255;
                               _blue = 255;
                             });
-                          }else{
+                          } else {
                             setState(() {
                               _red = 0;
                               _green = 0;
@@ -198,41 +210,60 @@ class _MyHomePageState extends State<MyHomePage> {
                             });
                           }
                         },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        elevation: 4.0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          elevation: 4.0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 14.0,
+                            horizontal: 40.0,
+                          ),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 40.0),
+                        child: wasPressedMaxMin
+                            ? Text('Min', style: TextStyle(color: Colors.black))
+                            : Text(
+                                'Max',
+                                style: TextStyle(color: Colors.black),
+                              ),
                       ),
-                      child: wasPressedMaxMin? Text('Min', style: TextStyle(color: Colors.black),): Text('Max', style: TextStyle(color: Colors.black),),),
-                ),
-                SizedBox(width: 15,),
-                Expanded(
-                    child: ElevatedButton(
-                        onPressed: (){
+                    ),
+                    SizedBox(width: 15),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
                           wasPressedVal = !wasPressedVal;
                           setState(() {
-                            wasPressedVal? _val = 2 : _val = 1;
+                            wasPressedVal ? _val = 2 : _val = 1;
                           });
                         },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        elevation: 4.0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          elevation: 4.0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 14.0,
+                            horizontal: 40.0,
+                          ),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 40.0),
+                        child: wasPressedVal
+                            ? Text(
+                                '+1/-1',
+                                style: TextStyle(color: Colors.black),
+                              )
+                            : Text(
+                                '+2/-2',
+                                style: TextStyle(color: Colors.black),
+                              ),
                       ),
-                        child: wasPressedVal? Text('+1/-1', style: TextStyle(color: Colors.black),): Text('+2/-2', style: TextStyle(color: Colors.black),),
-
-                    )
-                )
-              ],
-            )
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
